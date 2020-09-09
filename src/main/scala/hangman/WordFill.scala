@@ -1,19 +1,21 @@
-package Hangman
+package hangman
 
 import scala.collection.immutable
 
-case class WordFill(blanks: String, mistakes: Set[Char]) {
+case class WordFill(blanks: String, mistakes: Set[Char] = Set.empty) {
   val correctLetters: Set[Char] = blanks.toSet - '_'
   val allLetters: Set[Char] = correctLetters ++ mistakes
   require(allLetters.forall(Hangman.alphabet.contains))
   require((correctLetters & mistakes).isEmpty)
 
-  def matchesWord(word: String): Boolean = blanks.corresponds(word) {
+  def matches(word: String): Boolean = blanks.corresponds(word) {
     case ('_', l) => !allLetters.contains(l)
     case (bl, l) => l == bl
   }
 
   def length: Int = blanks.length
+
+  def numUnfilled: Int = blanks.count(_ == '_')
 
   def completelyDefinesWord: Boolean = blanks.forall(_ != '_')
 
@@ -32,6 +34,12 @@ case class WordFill(blanks: String, mistakes: Set[Char]) {
   def addMistake(letter: Char): Option[WordFill] =
     Option.when(Hangman.alphabet.contains(letter) && !correctLetters.contains(letter)) {
       WordFill(blanks, mistakes + letter)
+    }
+
+  def addMistakes(letters: Iterable[Char]): Option[WordFill] =
+    letters.foldLeft(Option(this)) {
+      case (None, _) => None
+      case (Some(wf), l) => wf.addMistake(l)
     }
 
   def compatible(other: WordFill): Boolean = this.blanks.corresponds(other.blanks) {
@@ -58,11 +66,22 @@ case class WordFill(blanks: String, mistakes: Set[Char]) {
 }
 
 object WordFill {
-  def decomposeWord(word: String): immutable.Iterable[WordFill] = {
+  def decompose(word: String): immutable.Iterable[WordFill] = {
     val allBlank = WordFill(blanks = Seq.fill(word.length)('_').mkString(""), mistakes = Set.empty)
     val indicesByLetter = word.indices.groupBy(word.charAt)
     indicesByLetter.flatMap {
       case (l, is) => allBlank.fillBlanks(l, is)
     }
   }
+
+  def combine(wfs: Iterable[WordFill]): Option[WordFill] =
+    wfs
+      .view
+      .map(Option(_))
+      .reduceOption { (x: Option[WordFill], y: Option[WordFill]) =>
+        (x, y) match {
+          case (Some(wf1), Some(wf2)) => wf1.combine(wf2)
+          case _ => None
+        }
+      }.flatten
 }

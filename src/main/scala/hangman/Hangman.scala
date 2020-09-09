@@ -1,12 +1,10 @@
-package Hangman
+package hangman
 
 import scala.io.Source
 import scala.io.StdIn.readLine
 
 trait Hangman {
   def guess(letter: Char): Either[String, Hangman]
-
-  def alphabet: Set[Char] = ('a' to 'z').toSet
 
   def lettersGuessed: Set[Char]
 
@@ -24,6 +22,8 @@ trait Hangman {
 }
 
 object Hangman {
+  def alphabet: Set[Char] = ('a' to 'z').toSet
+
   def playOnConsole(hangman: Hangman): Unit = {
     var h = hangman
     while (!h.isFinished) {
@@ -48,9 +48,17 @@ object Hangman {
     source.getLines.filter(w => w.length > 2).toVector
 }
 
+
 object Main extends App {
+  val wordLength = 6
+  val numGuesses = 6
   val vowels = Set('a', 'e', 'i', 'o', 'u', 'y')
-  val wordList = Hangman.loadWordList(Source.fromFile("wordlist_en.txt")).filter(_.exists(vowels.contains))
-  val h = new DishonestHangman(wordList, 8, 8)
+  val words = Hangman.loadWordList(Source.fromFile("wordlist_en.txt"))
+    .view
+    .filter(_.exists(vowels.contains))
+    .filter(_.length == wordLength)
+    .toVector
+
+  val h = new DishonestHangman(words, wordLength, numGuesses)
   Hangman.playOnConsole(h)
 }

@@ -1,6 +1,5 @@
-package Hangman
+package hangman
 
-import org.scalatest._
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
@@ -28,10 +27,10 @@ class WordFillTest extends AnyFlatSpec with should.Matchers {
     val empty5 = WordFill("_____", Set.empty)
     val empty9 = WordFill("_________", Set.empty)
     val empty0 = WordFill("", Set.empty)
-    assert(WORDLIST.filter(empty5.matchesWord) == WORDLIST.filter(_.length == 5))
-    assert(WORDLIST.filter(empty9.matchesWord) == WORDLIST.filter(_.length == 9))
-    assert(!WORDLIST.exists(empty0.matchesWord))
-    assert(empty0.matchesWord(""))
+    assert(WORDLIST.filter(empty5.matches) == WORDLIST.filter(_.length == 5))
+    assert(WORDLIST.filter(empty9.matches) == WORDLIST.filter(_.length == 9))
+    assert(!WORDLIST.exists(empty0.matches))
+    assert(empty0.matches(""))
   }
 
   "A completely filled WordFill" should "match exactly one word" in {
@@ -39,7 +38,7 @@ class WordFillTest extends AnyFlatSpec with should.Matchers {
     for (word <- words) {
       val wf = WordFill(word, Set.empty)
       assert(wf.completelyDefinesWord)
-      val filtered = WORDLIST.filter(wf.matchesWord)
+      val filtered = WORDLIST.filter(wf.matches)
       assert(filtered.length == 1)
       assert(filtered.head == word)
     }
@@ -53,21 +52,21 @@ class WordFillTest extends AnyFlatSpec with should.Matchers {
       WordFill("sh_t", Set('i'))
     )
     for (wf <- wfs) {
-      val filtered = WORDLIST.filter(wf.matchesWord)
+      val filtered = WORDLIST.filter(wf.matches)
       val mistakes = wf.mistakes
       assert(!filtered.exists(_.forall(mistakes.contains)))
     }
 
-    assert(!WORDLIST.exists(WordFill("____", Hangman.alphabet).matchesWord))
+    assert(!WORDLIST.exists(WordFill("____", Hangman.alphabet).matches))
   }
 
   it should "only match words where all filled letters correspond exactly" in {
-    assert(WordFill("__y__", Set.empty).matchesWord("chyme"))
-    assert(!WordFill("__y__", Set.empty).matchesWord("phyly"))
-    assert(WordFill("p_p___", Set.empty).matchesWord("papaya"))
-    assert(!WordFill("p_p___", Set.empty).matchesWord("lapdog"))
-    assert(WordFill("p__ph_l_", Set.empty).matchesWord("peephole"))
-    assert(!WordFill("p__ph_l_", Set.empty).matchesWord("poophell"))
+    assert(WordFill("__y__", Set.empty).matches("chyme"))
+    assert(!WordFill("__y__", Set.empty).matches("phyly"))
+    assert(WordFill("p_p___", Set.empty).matches("papaya"))
+    assert(!WordFill("p_p___", Set.empty).matches("lapdog"))
+    assert(WordFill("p__ph_l_", Set.empty).matches("peephole"))
+    assert(!WordFill("p__ph_l_", Set.empty).matches("poophell"))
   }
 
   "Two WordFills" should "only combine if compatible" in {

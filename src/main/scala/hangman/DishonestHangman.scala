@@ -1,4 +1,4 @@
-package Hangman
+package hangman
 
 import scala.util.Random
 
@@ -16,7 +16,7 @@ class DishonestHangman(
     })
 
   override def guess(letter: Char): Either[String, Hangman] =
-    if (!alphabet.contains(letter))
+    if (!Hangman.alphabet.contains(letter))
       Left("invalid letter")
     else if (numGuessesLeft <= 0)
       Left("out of guesses")
