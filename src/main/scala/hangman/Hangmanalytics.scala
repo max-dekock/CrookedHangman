@@ -2,13 +2,12 @@ package hangman
 
 import java.io._
 
-import hangman.Hangman.alphabet
+import hangman.Utils._
 
 import scala.collection.concurrent
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.io.Source
-import scala.util.Random
 
 
 object Hangmanalytics {
@@ -86,10 +85,7 @@ object Hangmanalytics {
   }
 
   def main(args: Array[String]): Unit = {
-    val vowels = "aeiouy".toSet
-    val wordList = Random.shuffle(
-      Hangman.loadWordList(Source.fromFile("wordlist_en.txt"))
-        .filter(_.exists(vowels.contains)))
+    val wordList = loadWordList(Source.fromFile("wordlist_en.txt"))
 
     val f = Future.sequence(for {
       l <- 3 to 7

@@ -1,12 +1,13 @@
 package hangman
 
+import hangman.Utils._
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
 import scala.io.Source
 
 class WordFillTest extends AnyFlatSpec with should.Matchers {
-  val WORDLIST: Seq[String] = Hangman.loadWordList(Source.fromFile("wordlist_en.txt"))
+  val WORDLIST: Seq[String] = loadWordList(Source.fromFile("wordlist_en.txt"))
 
   "WordFill's constructor" should "throw IllegalArgumentException when blanks overlaps with mistakes" in {
     an[IllegalArgumentException] should be thrownBy {
@@ -57,7 +58,7 @@ class WordFillTest extends AnyFlatSpec with should.Matchers {
       assert(!filtered.exists(_.forall(mistakes.contains)))
     }
 
-    assert(!WORDLIST.exists(WordFill("____", Hangman.alphabet).matches))
+    assert(!WORDLIST.exists(WordFill("____", alphabet).matches))
   }
 
   it should "only match words where all filled letters correspond exactly" in {

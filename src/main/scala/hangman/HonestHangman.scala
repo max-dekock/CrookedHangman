@@ -2,32 +2,29 @@ package hangman
 
 import scala.util.Random
 
-class HonestHangman(protected val word: String,
-                    val numGuessesLeft: Int,
-                    val lettersGuessed: Set[Char] = Set()
-                   ) extends Hangman {
+case class HonestHangman(private val secretWord: String) extends Hangman {
+  override def answer(trial: WordFill, guess: Char): Set[Int] =
+    secretWord.zipWithIndex.collect { case (`guess`, i) => i }.toSet
 
-  def this(wordList: Seq[String], numGuesses: Int) {
-    this(wordList(Random.nextInt(wordList.size)), numGuesses)
+  override def revealSolution(trial: WordFill): String = secretWord
+}
+
+object HonestHangman {
+  def withRandomWord(wordList: Iterable[String], wf: WordFill): HonestHangman = {
+    val secretWord = Random.shuffle(wordList.view.filter(wf.matches)).head
+    HonestHangman(secretWord)
   }
+}
 
-  override def guess(letter: Char): Either[String, Hangman] = {
-    if (!Hangman.alphabet.contains(letter))
-      Left("invalid letter")
-    else if (numGuessesLeft <= 0)
-      Left("out of guesses")
-    else if (lettersGuessed.contains(letter))
-      Left("letter already guessed")
-    else if (word contains letter)
-      Right(new HonestHangman(word, numGuessesLeft, lettersGuessed + letter))
-    else
-      Right(new HonestHangman(word, numGuessesLeft - 1, lettersGuessed + letter))
-  }
+object HonestGame extends App {
 
-  override def blanks: Seq[Option[Char]] =
-    word.map(c => if (lettersGuessed contains c) Some(c) else None)
+  import ConsoleGame._
 
-  override def solution: Option[String] =
-    if (isFinished) Some(word)
-    else None
+  do {
+    val wordLength = readInt(s"Enter word length ($minLength to $maxLength): ", (minLength to maxLength).contains)
+    val initialTrial = WordFill(Seq.fill(wordLength)('_').mkString(""))
+    val honestHangman = HonestHangman.withRandomWord(wordList, initialTrial)
+    playGame(initialTrial, honestHangman)
+  } while (readYN("Play again? (y/n) "))
+
 }

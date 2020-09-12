@@ -1,11 +1,13 @@
 package hangman
 
+import hangman.Utils._
+
 import scala.collection.immutable
 
 case class WordFill(blanks: String, mistakes: Set[Char] = Set.empty) {
   val correctLetters: Set[Char] = blanks.toSet - '_'
   val allLetters: Set[Char] = correctLetters ++ mistakes
-  require(allLetters.forall(Hangman.alphabet.contains))
+  require(allLetters.forall(alphabet.contains))
   require((correctLetters & mistakes).isEmpty)
 
   def matches(word: String): Boolean = blanks.corresponds(word) {
@@ -22,7 +24,7 @@ case class WordFill(blanks: String, mistakes: Set[Char] = Set.empty) {
   def numMistakes: Int = mistakes.size
 
   def fillBlanks(letter: Char, indices: Iterable[Int]): Option[WordFill] =
-    Option.when(!allLetters.contains(letter) && Hangman.alphabet.contains(letter)) {
+    Option.when(!allLetters.contains(letter) && alphabet.contains(letter)) {
       val newBlanks = indices.foldLeft(Option(blanks)) {
         case (None, _) => None
         case (Some(str), i) if str(i) == '_' => Some(str.updated(i, letter))
@@ -32,7 +34,7 @@ case class WordFill(blanks: String, mistakes: Set[Char] = Set.empty) {
     }.flatten
 
   def addMistake(letter: Char): Option[WordFill] =
-    Option.when(Hangman.alphabet.contains(letter) && !correctLetters.contains(letter)) {
+    Option.when(alphabet.contains(letter) && !correctLetters.contains(letter)) {
       WordFill(blanks, mistakes + letter)
     }
 
